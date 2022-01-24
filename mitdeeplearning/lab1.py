@@ -85,3 +85,9 @@ def test_custom_dense_layer_output(y):
     np.testing.assert_almost_equal(y.numpy(), true_y, decimal=7, err_msg="[FAIL] output is of incorrect value. expected {} but got {}".format(y.numpy(), true_y), verbose=True)
     print("[PASS] test_custom_dense_layer_output")
     return True
+
+
+if __name__ == '__main__':
+    songs = load_training_data()
+    play_song(songs[0])
+
