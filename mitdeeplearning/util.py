@@ -7,7 +7,11 @@ from IPython import display as ipythondisplay
 from string import Formatter
 
 
-
+def get_tune(song):
+    song = song.lstrip('\n')
+    lines = song.split('\n')
+    tunelines = lines[6:]
+    return '\n'.join(tunelines)
 
 
 def display_model(model):
