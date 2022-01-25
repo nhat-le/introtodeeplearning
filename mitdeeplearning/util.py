@@ -10,8 +10,31 @@ from string import Formatter
 def get_tune(song):
     song = song.lstrip('\n')
     lines = song.split('\n')
-    tunelines = lines[6:]
+    tunelines = lines[5:]
     return '\n'.join(tunelines)
+
+def generate_song_with_key_tune(tune, key="nan"):
+    '''
+    Returns a string for a complete song with key and tune information
+    :param key: a string e.g. 'A Major'
+    :param tune: a list of lines of the new song
+    :return: a complete song that is ready to play
+    '''
+    if type(tune) is str:
+        if tune[0] == 'K':
+            parts = tune.split('\n')
+            if key == "nan":
+                key = parts[0][2:]
+            tunejoined = '\n'.join(parts[1:])
+        else:
+            tunejoined = tune
+
+    else:
+        tunejoined = '\n'.join(tune)
+
+    header = 'X:1\nT:Name\nZ: id:dc-hornpipe-1\nM:C|\nL:1/8'
+    song = f"{header}\nK:{key}\n{tunejoined}"
+    return song
 
 
 def display_model(model):
