@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import time
 import numpy as np
+import re
 
 from IPython import display as ipythondisplay
 from string import Formatter
@@ -12,6 +13,91 @@ def get_tune(song):
     lines = song.split('\n')
     tunelines = lines[5:]
     return '\n'.join(tunelines)
+
+def vectorize_string(string, char2idx=None):
+    if char2idx == None:
+        vocab = sorted(set(string))
+        print("There are", len(vocab), "unique characters in the dataset")
+
+        char2idx = {u: i for i, u in enumerate(vocab)}
+        idx2char = np.array(vocab)
+    else:
+        idx2char = np.array(char2idx.keys())
+
+    vectorized_output = np.array([char2idx[char] for char in string])
+    return vectorized_output, char2idx, idx2char
+
+
+def vectorize_string_long(char2idx, string):
+    result = []
+    while len(string) > 0:
+        if string in char2idx:
+            result.append(char2idx[string])
+            string = ''
+        elif string[:2] in char2idx:
+            result.append(char2idx[string[:2]])
+            string = string[2:]
+        else:
+            result.append(char2idx[string[0]])
+            string = string[1:]
+
+    return np.array(result)
+
+def replace_key_signatures(songstr):
+   songstr = songstr.replace('%', 'Major')
+   songstr = songstr.replace('~', 'Minor')
+   songstr = songstr.replace('O', 'Dorian')
+   songstr = songstr.replace('X', 'Mixolydian')
+   return songstr
+
+
+def replace_str2(string, conversion):
+    newstr = ''
+    while len(string) > 0:
+        if string[:2] in conversion:
+            newstr += conversion[string[:2]]
+            string = string[2:]
+        elif string[0] in conversion:
+            newstr += conversion[string[0]]
+            string = string[1:]
+        else:
+            newstr += string[0]
+            string = string[1:]
+    return newstr
+
+def replace_str(string, patterns_from, patterns_to):
+    '''
+    Replace pattern 1 with pattern 2 in string
+    :param string: a string
+    :param pattern1: a substring
+    :param pattern2: a substring to replace pattern1
+    :return:
+    '''
+    # Vectorize the string
+    vocab = sorted(set(string))
+    print("There are", len(vocab), "unique characters in the dataset")
+
+    char2idx = {u: i for i, u in enumerate(vocab)}
+    idx2char = list(np.array(vocab))
+    stringvec = vectorize_string(char2idx, string)
+
+    N = len(idx2char)
+    assert(len(char2idx) == len(idx2char))
+
+    print(idx2char)
+    for idx, (pfrom, pto) in enumerate(zip(patterns_from, patterns_to)):
+        pos = re.finditer(pfrom, string)
+        locs = np.array([i.span()[0] for i in pos])
+        stringvec[locs] = N + idx
+        idx2char.append(pto)
+        print(idx2char)
+
+    print(len(idx2char), np.max(stringvec))
+    print(stringvec)
+    newstring = [idx2char[i] for i in stringvec]
+    return ''.join(newstring)
+
+
 
 def generate_song_with_key_tune(tune, key="nan"):
     '''

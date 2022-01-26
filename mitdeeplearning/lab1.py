@@ -4,6 +4,7 @@ import subprocess
 import urllib
 import numpy as np
 import tensorflow as tf
+from tqdm import tqdm
 
 from IPython.display import Audio
 
@@ -85,6 +86,41 @@ def test_custom_dense_layer_output(y):
     np.testing.assert_almost_equal(y.numpy(), true_y, decimal=7, err_msg="[FAIL] output is of incorrect value. expected {} but got {}".format(y.numpy(), true_y), verbose=True)
     print("[PASS] test_custom_dense_layer_output")
     return True
+
+
+### Prediction of a generated song ###
+
+def generate_text(model, start_string, char2idx, idx2char, generation_length=1000):
+    # Evaluation step (generating ABC text using the learned RNN model)
+
+    '''TODO: convert the start string to numbers (vectorize)'''
+    input_eval = [char2idx[s] for s in start_string]  # TODO
+    # input_eval = ['''TODO''']
+    input_eval = tf.expand_dims(input_eval, 0)
+
+    # Empty string to store our results
+    text_generated = []
+
+    # Here batch size == 1
+    model.reset_states()
+    tqdm._instances.clear()
+
+    for i in tqdm(range(generation_length)):
+        predictions = model(input_eval)
+
+        # Remove the batch dimension
+        predictions = tf.squeeze(predictions, 0)
+
+        predicted_id = tf.random.categorical(predictions, num_samples=1)[-1, 0].numpy()
+
+        # Pass the prediction along with the previous hidden state
+        #   as the next inputs to the model
+        input_eval = tf.expand_dims([predicted_id], 0)
+
+        # Hint: consider what format the prediction is in vs. the output
+        text_generated.append(idx2char[predicted_id])
+
+    return (start_string + ''.join(text_generated))
 
 
 if __name__ == '__main__':
