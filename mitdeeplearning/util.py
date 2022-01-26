@@ -51,14 +51,22 @@ def replace_key_signatures(songstr):
    return songstr
 
 
-def replace_str2(string, conversion):
+def replace_str2(string, notedict, keydict):
     newstr = ''
     while len(string) > 0:
-        if string[:2] in conversion:
-            newstr += conversion[string[:2]]
+        if string[0] == 'K':
+            if string[2] == ' ':
+                key = string[3]
+                string = string[4:]
+            else:
+                key = string[2]
+                string = string[3:]
+            newstr += f'K:{keydict[key]}'
+        elif string[:2] in notedict:
+            newstr += notedict[string[:2]]
             string = string[2:]
-        elif string[0] in conversion:
-            newstr += conversion[string[0]]
+        elif string[0] in notedict:
+            newstr += notedict[string[0]]
             string = string[1:]
         else:
             newstr += string[0]
