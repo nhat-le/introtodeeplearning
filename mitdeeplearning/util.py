@@ -8,6 +8,19 @@ from IPython import display as ipythondisplay
 from string import Formatter
 
 
+def get_headers(song):
+    song = song.lstrip('\n')
+    lines = song.split('\n')
+    header = [line.split(':')[0] if line[1] == ':' else None for line in lines]
+    content = [line.split(':')[1:] if line[1] == ':' else None for line in lines]
+#     print(header)
+    if header[0] == 'X' and header[1] == 'T' and header[2] == 'Z' and header[3] == 'M' \
+        and header[4] == 'L' and header[5] == 'K':
+        flag = 0 # a standard song
+    else:
+        flag = 1
+    return header, content, flag
+
 def get_tune(song):
     song = song.lstrip('\n')
     lines = song.split('\n')
